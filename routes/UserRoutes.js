@@ -24,5 +24,4 @@ router.get('/profile', authGuard, getCurrentUser);
 //Rota de alteração (update) de dados do usuário :
 router.put('/', authGuard, validate(userUpdateValidation()), imageUpload.single("profileImage"), update);
 
-
 module.exports = router;

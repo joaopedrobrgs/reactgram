@@ -6,6 +6,9 @@ const jwt = require("jsonwebtoken");
 
 const jwtSecret = process.env.JWT_SECRET;
 
+const mongoose = require("mongoose");
+const { ObjectId } = mongoose.Types;
+
 // Gerando token do usuário:
 const generateUserToken = (id) => {
     //método sign retorna token gerado, com base no id e no segredo do jwt:
@@ -104,7 +107,57 @@ const getCurrentUser = async (req, res) => {
 
 //Função/Controller de fazer update dos dados do usuário:
 const update = async (req, res) => {
-    res.send("Update")
+
+    //Pegando dados que podem ter sido alterados ou não
+    const { name, password, bio } = req.body;
+
+    //Pegando imagem do perfil que pode ter sido alterada ou não
+    let profileImage = null;
+    if (req.file) {
+        profileImage = req.file.filename;
+    }
+
+    //Pegando usuário que fez a requisição através do token
+    const reqUser = req.user;
+
+    //Pegando correspondente do usuário cadastrado no banco de dados do MongoDB
+    const user = await User.findById(new ObjectId(reqUser._id)).select("-password");
+
+    //Alterando nome do usuário (caso seja enviado um novo nome na requisição):
+    if (name) {
+        user.name = name;
+    }
+
+    //Alterando senha do usuário (caso seja enviado uma nova senha na requisição):
+    if (password) {
+        //Gerando password hash - Criptografando senha do usuário para salvar no DB
+        const salt = await bcrypt.genSalt();
+        const passwordHash = await bcrypt.hash(password, salt);
+        //Alterando senha de fato:
+        user.password = passwordHash;
+    }
+
+    //Alterando imagem de perfil do usuário (caso seja enviado uma imagem na requisição):
+    if (profileImage) {
+        user.profileImage = profileImage;
+    }
+
+    //Alterando bio do usuário (caso seja enviado uma nova bio na requisição):
+    if (bio) {
+        user.bio = bio;
+    }
+
+    try {
+        //Salvando novos dados do usuário no banco de dados do mongoDB:
+        await user.save();
+        //Retornando dados atualizados para o Front-End:
+        res.status(200).json(user);
+    }catch{
+        //Retornando para o Front-End que houve um erro no servidor:
+        res.status(422).json({ errors: ["houve um erro, por favor tente mais tarde."] })
+        return
+    }
+
 }
 
 module.exports = {
