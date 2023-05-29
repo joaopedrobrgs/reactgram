@@ -152,10 +152,40 @@ const update = async (req, res) => {
         await user.save();
         //Retornando dados atualizados para o Front-End:
         res.status(200).json(user);
-    }catch{
+    } catch {
         //Retornando para o Front-End que houve um erro no servidor:
         res.status(422).json({ errors: ["houve um erro, por favor tente mais tarde."] })
         return
+    }
+
+}
+
+//Pegando usuário qualquer da aplicação pelo ID:
+const getUserById = async (req, res) => {
+
+    //Pegando ID do usuário que queremos que seja retornado através da URL:
+    const { id } = req.params;
+
+    let user = null;
+
+    //Tentativa de buscar usuário no banco de dados:
+    try {
+        //Buscando usuário no banco de dados:
+        user = await User.findById(new ObjectId(id)).select("-password");
+        //Checando se o usuário existe:
+        //Caso ele não exista, mas o params passado estiver no formato correto (mesma
+        //quantidade de caracteres) o comando abaixo será executado (mensagem de erro):
+        if (!user) {
+            res.status(404).json({ errors: ["Usuário não encontrado."] });
+            return;
+        }
+        //Caso ele exista, o comando abaixo será executado (dados do usuário serão retornados):
+        res.status(200).json(user);
+    }catch (error){
+        //Caso ele não exista e o params passado estiver em um formato nada a ver,
+        //o comando abaixo será executado (mensagem de erro):
+        res.status(422).json({ errors: ["Usuário não encontrado."] });
+        return;
     }
 
 }
@@ -164,5 +194,6 @@ module.exports = {
     register,
     login,
     getCurrentUser,
-    update
+    update,
+    getUserById
 }
