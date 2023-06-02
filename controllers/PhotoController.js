@@ -29,12 +29,11 @@ const insertPhoto = async (req, res) => {
 
     //Checando se houve algum erro na criação da foto (erro genérico / provavelmente do sistema):
     if (!newPhoto) {
-        res.status(422).json({ errors: ["Houve um erro, por favor tente mais tarde."] });
-        return;
+        return res.status(422).json({ errors: ["Houve um erro, por favor tente mais tarde."] });
     }
 
     // Se a foto foi criada corretamente, retorna-la:
-    res.status(201).json(newPhoto);
+    return res.status(201).json(newPhoto);
 
 }
 
@@ -53,28 +52,24 @@ const deletePhoto = async (req, res) => {
 
         //Verificando se foto existe:
         if (!photo) {
-            res.status(404).json({ saterrors: ["Foto não encontrada."] });
-            return;
+            return res.status(404).json({ saterrors: ["Foto não encontrada."] });
         }
 
         //Verificando se foto pertence ao usuário:
         if (!photo.userID.equals(reqUser._id)) {
-            res.status(422).json({ errors: ["Houve um erro, por favor tente mais tarde."] });
-            return;
+            return res.status(422).json({ errors: ["Houve um erro, por favor tente mais tarde."] });
         }
 
         try {
             //Apagando a foto do banco de dados:
             await Photo.findByIdAndDelete(photo._id);
             //Retornando ID da foto apagada ao Front End e também mensagem informando exclusão:
-            res.status(200).json({ id: photo._id, message: "Foto excluída com sucesso." })
+            return res.status(200).json({ id: photo._id, message: "Foto excluída com sucesso." })
         } catch {
-            res.status(422).json({ errors: ["Houve um erro, por favor tente mais tarde."] })
-            return;
+            return res.status(422).json({ errors: ["Houve um erro, por favor tente mais tarde."] })
         }
     } catch {
-        res.status(404).json({ errors: ["Foto não encontrada."] })
-        return;
+        return res.status(404).json({ errors: ["Foto não encontrada."] })
     }
 
 
@@ -88,8 +83,7 @@ const getAllPhotos = async (req, res) => {
 
     //Retornando que houve um erro no sistema caso nenhuma foto seja retornada:
     if (!photos) {
-        res.status(422).json({ errors: ["Houve um erro, por favor tente mais tarde."] })
-        return;
+        return res.status(422).json({ errors: ["Houve um erro, por favor tente mais tarde."] })
     }
 
     //Se der tudo certo, retornar todas as fotos do banco de dados:
@@ -108,19 +102,17 @@ const getUserPhotos = async (req, res) => {
         const photos = await Photo.find({ userID: id }).sort([["createdAt", -1]]).exec();
         //Fazendo checagem se alguma foto foi encontrada ou não:
         if (photos.length == 0) {
-            res.status(404).json({ errors: ["Usuário não possui fotos ou não foi encontrado."] })
-            return;
+            return res.status(404).json({ errors: ["Usuário não possui fotos ou não foi encontrado."] })
         }
         //Fazendo checagem se houve erro do servidor na busca pelas fotos:
         if (!photos) {
-            res.status(422).json({ errors: ["Houve um erro, por favor tente mais tarde."] })
-            return;
+            return res.status(422).json({ errors: ["Houve um erro, por favor tente mais tarde."] })
         }
         //Retornando fotos do usuário, caso dê tudo certo:
-        res.status(200).json(photos);
+        return res.status(200).json(photos);
     } catch {
         //Retornando erro caso params não respeite os requisitos (quantidade de caracteres ou algo do gênero):
-        res.status(404).json({ errors: ["Usuário não encontrado."] })
+        return res.status(404).json({ errors: ["Usuário não encontrado."] })
     }
 
 }
@@ -136,14 +128,13 @@ const getPhotoById = async (req, res) => {
         const photo = await Photo.findById(new ObjectId(id));
         //Fazendo checagem se alguma foto foi encontrada:
         if (!photo) {
-            res.status(404).json({ errors: ["Foto não encontrada."] })
-            return;
+            return res.status(404).json({ errors: ["Foto não encontrada."] })
         }
         //Retornando foto, se deu tudo certo:
-        res.status(200).json(photo);
+        return res.status(200).json(photo);
     } catch {
         //Fazendo checagem se alguma foto foi encontrada:
-        res.status(404).json({ errors: ["Foto não encontrada."] })
+        return res.status(404).json({ errors: ["Foto não encontrada."] })
     }
 
 }
@@ -166,40 +157,74 @@ const updatePhoto = async (req, res) => {
         const photo = await Photo.findById(new ObjectId(id));
         //Fazendo checagem se alguma foto foi encontrada (params incorreto):
         if (!photo) {
-            res.status(404).json({ errors: ["Foto não encontrada."] })
-            return;
+            return res.status(404).json({ errors: ["Foto não encontrada."] })
         }
         //Verificando se foto pertence ao usuário:
         if (!photo.userID.equals(reqUser._id)) {
-            res.status(422).json({ errors: ["Houve um erro, por favor tente mais tarde."] });
-            return;
+            return res.status(422).json({ errors: ["Houve um erro, por favor tente mais tarde."] });
         }
         //Alterando título da foto pelo título que foi enviado na requisição
-        if(title){
+        if (title) {
             photo.title = title;
         }
         try {
-            //Fazendo essa alteração no documento:
-            //1ª forma:
-            // await Photo.findByIdAndUpdate(photo._id, photo);
-            //2ª forma: 
+            //Salvando essa alteração no documento:
             await photo.save();
-
             //Retornando foto já modificada e mensagem informando FRONT END que deu tudo certo:
-            res.status(200).json({photo, message: "Foto atualizada com sucesso."});
-
+            return res.status(200).json({ photo, message: "Foto atualizada com sucesso." });
         } catch {
             //Retornando se houve erro do sistema:
-            res.status(422).json({ errors: ["Houve um erro, por favor tente mais tarde."] });
-            return;
+            return res.status(422).json({ errors: ["Houve um erro, por favor tente mais tarde."] });
         }
     } catch {
         //Fazendo checagem se alguma foto foi encontrada (params fora do padrão):
-        res.status(404).json({ errors: ["Foto não encontrada."] })
-        return;
+        return res.status(404).json({ errors: ["Foto não encontrada."] })
+    }
+
+}
+
+const likePhoto = async (req, res) => {
+
+    //Pegando ID da foto pela URL (params):
+    const { id } = req.params;
+
+    //Pegando dados do usuário logado (que vem através do TOKEN):
+    const reqUser = req.user;
+
+    try {
+        //Buscando a foto no banco de dados utilizando o seu ID como filtro:
+        const photo = await Photo.findById(new ObjectId(id));
+        //Fazendo checagem se alguma foto foi encontrada (params incorreto):
+        if (!photo) {
+            return res.status(404).json({ errors: ["Foto não encontrada."] })
+            
+        }
+        //Checando se usuário já curtiu a foto utilizando método includes do Mongooose:
+        if(photo.likes.includes(reqUser._id)){
+            //Se já tive curtida avisar FRONT END:
+            return res.status(422).json({errors: ["Você já curtiu a foto."]})
+        }
+
+        //Se não tiver curtida, adicionar ID do usuário no array de likes:
+        photo.likes.push(reqUser._id)
+
+        try {
+            //Salvando essa alteração no documento:
+            await photo.save();
+            //Retornando ao front end: ID da foto que foi curtida, usuário que a curtiu e mensagem
+            //informando que deu tudo certo:
+            return res.status(200).json({photoId: id, userId: reqUser._id, message: "A foto foi curtida."});
+        } catch {
+            //Retornando se houve erro do sistema:
+            return res.status(422).json({ errors: ["Houve um erro, por favor tente mais tarde."] });
+        }
+    } catch {
+        //Fazendo checagem se alguma foto foi encontrada (params fora dos padrões):
+        return res.status(404).json({ errors: ["Foto não encontrada 2."] });
     }
 
 }
 
 
-module.exports = { insertPhoto, deletePhoto, getAllPhotos, getUserPhotos, getPhotoById, updatePhoto };
+module.exports = { insertPhoto, deletePhoto, getAllPhotos, getUserPhotos, getPhotoById, updatePhoto, likePhoto };
+
