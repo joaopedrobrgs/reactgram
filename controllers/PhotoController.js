@@ -148,4 +148,58 @@ const getPhotoById = async (req, res) => {
 
 }
 
-module.exports = { insertPhoto, deletePhoto, getAllPhotos, getUserPhotos, getPhotoById };
+//Função de alterar uma foto do usuário logado através do seu ID:
+const updatePhoto = async (req, res) => {
+
+    //Pegando ID da foto pela URL (params):
+    const { id } = req.params;
+
+    //Pegando novos dados da foto que virão pela requisição do usuário (permitido alterar apenas titulo):
+    const { title } = req.body;
+
+    //Pegando dados do usuário logado (que vem através do TOKEN):
+    const reqUser = req.user;
+
+
+    try {
+        //Buscando a foto no banco de dados utilizando o seu ID como filtro:
+        const photo = await Photo.findById(new ObjectId(id));
+        //Fazendo checagem se alguma foto foi encontrada (params incorreto):
+        if (!photo) {
+            res.status(404).json({ errors: ["Foto não encontrada."] })
+            return;
+        }
+        //Verificando se foto pertence ao usuário:
+        if (!photo.userID.equals(reqUser._id)) {
+            res.status(422).json({ errors: ["Houve um erro, por favor tente mais tarde."] });
+            return;
+        }
+        //Alterando título da foto pelo título que foi enviado na requisição
+        if(title){
+            photo.title = title;
+        }
+        try {
+            //Fazendo essa alteração no documento:
+            //1ª forma:
+            // await Photo.findByIdAndUpdate(photo._id, photo);
+            //2ª forma: 
+            await photo.save();
+
+            //Retornando foto já modificada e mensagem informando FRONT END que deu tudo certo:
+            res.status(200).json({photo, message: "Foto atualizada com sucesso."});
+
+        } catch {
+            //Retornando se houve erro do sistema:
+            res.status(422).json({ errors: ["Houve um erro, por favor tente mais tarde."] });
+            return;
+        }
+    } catch {
+        //Fazendo checagem se alguma foto foi encontrada (params fora do padrão):
+        res.status(404).json({ errors: ["Foto não encontrada."] })
+        return;
+    }
+
+}
+
+
+module.exports = { insertPhoto, deletePhoto, getAllPhotos, getUserPhotos, getPhotoById, updatePhoto };
