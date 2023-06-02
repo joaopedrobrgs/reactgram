@@ -24,12 +24,25 @@ const photoInsertValidation = () => {
 const photoUpdateValidation = () => {
     return [
         body("title")
-        .optional()
-        .isString()
-        .withMessage("O título é obrigatório")
-        .isLength({min: 3})
-        .withMessage("O título precisa ter no mínimo 3 caracteres.")
+            .optional()
+            .isString()
+            .withMessage("O título é obrigatório")
+            .isLength({ min: 3 })
+            .withMessage("O título precisa ter no mínimo 3 caracteres.")
     ]
 }
 
-module.exports = {photoInsertValidation, photoUpdateValidation};
+const commentValidation = () => {
+    return [
+        body("text")
+            .not()
+            .equals("undefined")
+            .withMessage("Digite algo.")
+            .isString()
+            .withMessage("Digite algo.")
+            .isLength({ min: 1 })
+            .withMessage("O comentário precisar ter pelo menos 1 caracter."),
+    ]
+}
+
+module.exports = { photoInsertValidation, photoUpdateValidation, commentValidation };
