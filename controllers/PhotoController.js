@@ -233,12 +233,12 @@ const newComment = async (req, res) => {
     //Pegando texto do comentário que virá pelo corpo da requisição (esse texto já foi validado por um 
     //middleware, então, obrigatoriamente, vai existir):
     const { text } = req.body;
-    try{
+    try {
         //Buscando a foto no banco de dados utilizando o seu ID como filtro:
         const photo = await Photo.findById(new ObjectId(id));
         //Fazendo checagem se alguma foto foi encontrada (params incorreto):
-        if(!photo){
-            return res.status(404).json({errors: ["Foto não encontrada."]})
+        if (!photo) {
+            return res.status(404).json({ errors: ["Foto não encontrada."] })
         }
         //Montando comentário, com texto que foi enviado na requisição, dados do usuário que fez a requisição 
         //(usuário logado) e data de criação:
@@ -252,71 +252,95 @@ const newComment = async (req, res) => {
         };
         //Adicionando comentário do usuário no array de comentário:
         photo.comments.push(comment)
-        try{
+        try {
             //Salvando essa alteração no documento:
             await photo.save();
             //Retornando ao front end: ID da foto que foi curtida, dados do comentário e mensagem
             //informando que deu tudo certo:
-            return res.status(200).json({photoId: id, comment, message: "A foto foi comentada." })
-        }catch{
+            return res.status(200).json({ photoId: id, comment, message: "A foto foi comentada." })
+        } catch {
             //Retornando se houve erro do sistema:
             return res.status(422).json({ errors: ["Houve um erro, por favor tente mais tarde."] });
         }
-    }catch{
+    } catch {
         //Fazendo checagem se alguma foto foi encontrada (params fora dos padrões):
-        return res.status(404).json({errors: ["Foto não encontrada."]})
+        return res.status(404).json({ errors: ["Foto não encontrada."] })
     }
 }
 
 const deleteComment = async (req, res) => {
     //Pegando ID da foto pela URL (params):
-    const {id} = req.params;
+    const { id } = req.params;
     //Pegando dados do usuário logado (que vem através do TOKEN):
     const reqUser = req.user;
     //Pegando ID do comentário que vai ser apagado. Esse ID virá pelo corpo da requisição e vai
     //ser validado mais a frente:
-    const {commentID} = req.body;
-    try{
+    const { commentID } = req.body;
+    try {
         //Buscando a foto no banco de dados utilizando o seu ID como filtro:
         const photo = await Photo.findById(new ObjectId(id));
         //Fazendo checagem se alguma foto foi encontrada (params incorreto):
-        if(!photo){
-            return res.status(404).json({errors: ["Foto não encontrada."]})
+        if (!photo) {
+            return res.status(404).json({ errors: ["Foto não encontrada."] })
         }
         //Fazendo checagem se algum ID foi enviado no corpo da requisição:
-        if(!commentID){
-            return res.status(404).json({errors: ["Comentário não existe ou não foi encontrado."]})
+        if (!commentID) {
+            return res.status(404).json({ errors: ["Comentário não existe ou não foi encontrado."] })
         }
         //Fazendo checagem se ID que foi enviado na requisição corresponde com o ID de algum comentário
         //da foto:
         const checkingIfCommentExists = photo.comments.filter(element => {
             return element.commentID == commentID
         })
-        if(!checkingIfCommentExists || checkingIfCommentExists.length == 0){
-            return res.status(404).json({errors: ["Comentário não existe ou não foi encontrado."]})
+        if (!checkingIfCommentExists || checkingIfCommentExists.length == 0) {
+            return res.status(404).json({ errors: ["Comentário não existe ou não foi encontrado."] })
         }
         //Filtrando comentários da foto, para que sejam retornados apenas os que tiverem um ID diferente:
         const filteredComments = photo.comments.filter(element => {
             return element.commentID !== commentID
         })
-        if(filteredComments && filteredComments !== undefined){
+        if (filteredComments && filteredComments !== undefined) {
             photo.comments = filteredComments;
         }
-        try{
+        try {
             //Salvando essa alteração no documento:
             await photo.save();
             //Retornando ao front end: ID da foto que teve o comentário apagado, comentários atualizados e 
             //mensagem informando que deu tudo certo:
-            return res.status(200).json({photoId: id, comments: photo.comments, message: "O comentário foi apagado."})
-        }catch{
+            return res.status(200).json({ photoId: id, comments: photo.comments, message: "O comentário foi apagado." })
+        } catch {
             //Retornando se houve erro do sistema:
             return res.status(422).json({ errors: ["Houve um erro, por favor tente mais tarde."] });
         }
-    }catch{
+    } catch {
         //Fazendo checagem se alguma foto foi encontrada (params fora dos padrões):
-        return res.status(404).json({errors: ["Foto não encontrada."]})
+        return res.status(404).json({ errors: ["Foto não encontrada."] })
     }
 }
 
-module.exports = { insertPhoto, deletePhoto, getAllPhotos, getUserPhotos, getPhotoById, updatePhoto, likePhoto, newComment, deleteComment };
+const searchPhotos = async (req, res) => {
+
+    //Pegando pesquisa do usuário pelo título da foto, que vai ser passada no FRONT END pela 
+    //query (URL da requisição):
+    const {q} = req.query;
+
+    try {
+        //Buscando a foto no banco de dados utilizando o seu título como filtro (deve 
+        //apenas conter parte da string do titulo):
+        const photo = await Photo.find({title: new RegExp(q, "i")}).exec();
+        //Fazendo checagem se alguma foto foi encontrada (título incorreto ou nada passado):
+        if(!photo){
+            return res.status(404).json({ errors: ["Foto não encontrada."] })
+        }
+        //Retornando foto se deu tudo certo:
+        return res.status(200).json(photo);
+    }
+    catch {
+        //Retornando se houve algum erro no sistema:
+        return res.status(422).json({ errors: ["Houve um erro, por favor tente mais tarde."] })
+    }
+
+}
+
+module.exports = { insertPhoto, deletePhoto, getAllPhotos, getUserPhotos, getPhotoById, updatePhoto, likePhoto, newComment, deleteComment, searchPhotos };
 

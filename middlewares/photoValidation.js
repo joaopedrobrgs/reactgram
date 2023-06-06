@@ -41,7 +41,7 @@ const commentValidation = () => {
             .isString()
             .withMessage("Digite algo.")
             .isLength({ min: 1 })
-            .withMessage("O comentário precisar ter pelo menos 1 caracter."),
+            .withMessage("O comentário precisar ter pelo menos 1 carácter."),
     ]
 }
 
