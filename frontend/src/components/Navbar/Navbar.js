@@ -10,22 +10,27 @@ const Navbar = () => {
       {/* Nome do app com link para página inicial: */}
       <Link to="/">Reactgram</Link>
       {/* Formulário de busca: */}
-      <form action="">
+      <form action="" id="search-form">
         <BsSearch />
-        <input type="text" />
+        <input type="text" placeholder="Pesquisar"/>
       </form>
       {/* Links para as páginas do app: */}
       <ul id="nav-links">
-        {/* Link para página inicial: */}
-        <NavLink to="/">
-          <BsHouseDoorFill />
-        </NavLink>
-        <NavLink to="/login">
-          Entrar
-        </NavLink>
-        <NavLink to="register">
-          Cadastrar
-        </NavLink>
+        <li>
+          <NavLink to="/">
+            <BsHouseDoorFill />
+          </NavLink>
+        </li>
+        <li>
+          <NavLink to="/login">
+            Entrar
+          </NavLink>
+        </li>
+        <li>
+          <NavLink to="register">
+            Cadastrar
+          </NavLink>
+        </li>
       </ul>
     </nav>
   )

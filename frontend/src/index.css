@@ -7,3 +7,98 @@ body {
     background-color: #121212;
     color: #fafafa;
 }
+
+/* Configuração comum a todos os links: */
+a{
+    color: #FAFAFA;
+    text-decoration: none;
+}
+
+/* Configuração de um LINK ativo (se estivermos na página /login, o link dela ficará com esse estilo abaixo): */
+.active{
+    font-weight: bold;
+}
+
+/* Configuração comum a todos as listas: */
+ul{
+    list-style: none;
+}
+
+/* Configuração comum a todos os formulários: */
+form {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Configuração comum a todas as labels: */
+label{
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+}
+
+/* Configuração comum a todos os spans (textos) dentro de uma label: */
+label span{
+    font-weight: bold;
+    margin-bottom: 0.5em;
+    color: #AAA;
+    font-size: 0.7em;
+}
+
+/* Configuração comum a todos os inputs: */
+input{
+    background-color: #3b3b3b;
+    color: #AAA;
+    border: 1px solid #555;
+    border-radius: 2px;
+    padding: 10px 8px;
+    outline: none;
+    margin-bottom: 0.6em;
+}
+
+/* Configuração do texto placeholder dentro de todos os input: */
+input::placeholder{
+    color: #AAA;
+}
+
+/* Configuração comum a todos os elementos com classe "btn" e a todos com tag "button" e "input" do tipo "submit": */
+.btn,
+button,
+input[type="submit"]{
+    background-color: #0094f6;
+    color: #FFF;
+    border: none;
+    border-radius: 4px;
+    padding: 10px 8px;
+    font-weight: bold;
+    cursor: pointer;
+    opacity: 0.8;
+    font-size: 1em;
+}
+
+/* Configuração comum a todos os inputs do tipo "submit": */
+input[type="submit"]{
+    margin-top: 1em; /*Afasta o botão de envio do formulário dos demais inputs*/
+}
+
+/* Configuração comum a todos os inputs que estão desabilitados: */
+input:disabled {
+    cursor: not-allowed; /*Cria um simbolo de proibido*/
+    background-color: #000;
+}
+
+/* Configuração comum a todos os elementos com tag "button" e "input" do tipo "submit" quando o mouse estiver em cima: */
+button:hover,
+input[type="submit"]:hover{
+    opacity: 1;
+}
+
+/* Configuração comum a todos os elementos com a classe "cancel-btn": */
+.cancel-btn{
+    background-color: #CCC;
+}
+
+/* Configuração comum a todos os elementos com a classe "hide": */
+.hide{
+    display: none;
+}
