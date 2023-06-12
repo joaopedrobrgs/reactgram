@@ -4,7 +4,11 @@ import "./Auth.css";
 import { Link } from 'react-router-dom';
 
 //Hooks
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react'; //Hooks do react
+import { useSelector, useDispatch } from "react-redux"; //Hooks do Redux
+
+//Redux Actions
+import {register, reset} from "../../slices/authSlice";
 
 const Register = () => {
 
@@ -13,6 +17,9 @@ const Register = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
+  const dispath = useDispatch();
+  //Pegando estado salvo no nosso reducer "auth"
+  const {loading, error} = useSelector((state) => state.auth);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -25,7 +32,15 @@ const Register = () => {
     }
 
     console.log(user);
+
+    //Dando dispath na ação de registrar usuário:
+    dispath(register(user));
   }
+
+  //Resetando estado salvo no reducer "auth" sempre que um dispath for executado:
+  useEffect(()=>{
+    dispath(reset());
+  }, [dispath])
 
   return (
     <div id="register">
