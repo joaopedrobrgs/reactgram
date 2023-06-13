@@ -28,6 +28,27 @@ export const register = createAsyncThunk("auth/register",
     }
 )
 
+//Ação de fazer login (bem parecida com a de registro):
+export const login = createAsyncThunk("auth/login",
+    async (user, thunkAPI) => {
+        //Pegando dados do usuário que vem pela execução do serviço de login:
+        const data = await authService.login(user);
+        //Checando possíveis erros:
+        if (data.errors) {
+            return thunkAPI.rejectWithValue(data.errors[0]); //O que vai ser retornado aqui é o array de erros que enviamos lá do BACK END para o FRONT END. Nessa nossa aplicação, esse array de erros, vai ter sempre apenas um elemento. Então é esse elemento "[0]" que iremos pegar.
+        }
+        //Retornando usuário se deu tudo certo:
+        return data;
+    }
+)
+
+//Ação de fazer logout
+export const logout = createAsyncThunk("auth/logout",
+    async () => {
+        await authService.logout(); 
+    }
+)
+
 //Criando slice:
 export const authSlice = createSlice({
 
@@ -44,8 +65,7 @@ export const authSlice = createSlice({
             state.loading = false;
             state.error = false;
             state.success = false;
-        },
-        register
+        }
     },
 
     //Ações Extras:
@@ -67,6 +87,35 @@ export const authSlice = createSlice({
             })
             //Ação de requisição de registro com erro (erro vai ser recebido como carga):
             .addCase(register.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload;
+                state.user = null;
+            })
+
+            //Ações vinculadas à ação de logout
+            //Ação de requisição de logout completa:
+            .addCase(logout.fulfilled, (state) => {
+                state.loading = false;
+                state.success = true;
+                state.error = null;
+                state.user = null;
+            })
+
+            //Ações vinculadas à ação de login
+            //Ação de requisição de login pendente (carregando):
+            .addCase(login.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            //Ação de requisição de login completa (usuário vai ser recebido como carga):
+            .addCase(login.fulfilled, (state, action) => {
+                state.loading = false;
+                state.success = true;
+                state.error = null;
+                state.user = action.payload;
+            })
+            //Ação de requisição de login com erro (erro vai ser recebido como carga):
+            .addCase(login.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload;
                 state.user = null;
